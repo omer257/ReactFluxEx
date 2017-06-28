@@ -7,7 +7,7 @@ class TextInput extends Component {
 
         let wrapperClass="form-group";
         if(this.props.error && this.props.error.length>0){
-            wrapperClass += " " + "has-error";
+            wrapperClass += " has-error";
         }
         return (
             <div className={wrapperClass}>

@@ -1,29 +1,37 @@
 import React, {Component} from 'react';
-import AuthorApi from '../../api/AuthorApi';
-import AuthorsList from './AuthorsList';
+import AuthorStore from '../../stores/AuthorStore';
+import AuthorList from './AuthorsList';
 import {Link} from 'react-router-dom'
 
-class Authors extends Component {
-    constructor(props) {
-        super(props)
-        this.state = {
-            authors: []
-        };
-    }
-    componentWillMount() {
-        this.setState({
-            authors: AuthorApi.getAllAuthors()
-        });
-    }
-    render() {
-        return (
-            <div className="row">
-                <h3>Authors</h3>
-                <Link to="/author" className="btn btn-default">Add authors</Link>
-                <AuthorsList authors={this.state.authors}/>
-            </div>
-        );
-    }
-}
+var Authors = React.createClass({
+	getInitialState: function() {
+		return {
+			authors: AuthorStore.getAllAuthors()
+		};
+	},
+
+	componentWillMount: function() {
+		AuthorStore.addChangeListener(this._onChange);
+	},
+
+	//Clean up when this component is unmounted
+	componentWillUnmount: function() {
+		AuthorStore.removeChangeListener(this._onChange);
+	},
+
+	_onChange: function() {
+		this.setState({ authors: AuthorStore.getAllAuthors() });
+	},
+
+	render: function() {
+		return (
+			<div>
+				<h1>Authors</h1>
+				<Link to="addAuthor" className="btn btn-default">Add Author</Link>
+				<AuthorList authors={this.state.authors} />
+			</div>
+		);
+	}
+});
 
 export default Authors;

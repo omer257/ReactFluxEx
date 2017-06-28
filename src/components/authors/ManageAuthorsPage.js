@@ -1,8 +1,10 @@
 import React, {Component} from 'react';
 import AuthorForm from './AuthorForm';
-import AuthorApi from '../../api/AuthorApi';
+// import AuthorApi from '../../api/AuthorApi';
+import AuthorStore from '../../stores/AuthorStore';
 import toastr from 'toastr';
 import '../../../node_modules/toastr/build/toastr.min.css';
+import authorActions from '../../actions/AuthorActions';
 
 class ManageAuthorsPage extends Component {
     constructor(props) {
@@ -13,28 +15,31 @@ class ManageAuthorsPage extends Component {
                 firstName: '',
                 lastName: ''
             },
-            errors:{}
+            errors: {}
         };
     }
-    
+
     componentWillMount() {
         let authorId = this.props.match.params.id;
-        if(authorId){
-            this.setState({author: AuthorApi.getAuthorById(authorId)});
+        if (authorId) {
+            this.setState({
+                author: AuthorStore.getAuthorById(authorId)
+            });
         }
     }
-    
+
     setAuthorState = (event) => {
         let field = event.target.name;
         let item = event.target.value;
-        this.state.author[field] = item;
-        return this.setState({author: this.state.author});
+        let curState = this.state;
+        curState.author[field] = item;
+        return this.setState({author: curState.author});
     }
     authorFormIsValid = () => {
-        var formIsValid= true;
+        var formIsValid = true;
         this.setState({errors: {}});
         let errors = {};
-        if(this.state.author.firstName.length<3){
+        if (this.state.author.firstName.length < 3) {
             errors.firstName = 'First name must be 3 char'
             formIsValid = false;
         }
@@ -43,12 +48,20 @@ class ManageAuthorsPage extends Component {
     }
     saveAuthor = (event) => {
         event.preventDefault();
-        if(!this.authorFormIsValid()){
-            return ;
+        if (!this.authorFormIsValid()) {
+            return;
         }
-        AuthorApi.saveAuthor(this.state.author);
+        if (!this.state.author.id) {
+            authorActions.updateAuthor(this.state.author);
+        } else {
+            authorActions.createAuthor(this.state.author);
+
+        }
         toastr.success('Added succesfully! Yay!');
-        this.props.history.push('/authors');
+        this
+            .props
+            .history
+            .push('/authors');
     }
     render() {
         return (
